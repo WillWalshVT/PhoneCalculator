@@ -1,4 +1,4 @@
-name: Test and deploy Phasor
+name: Test Phasor
 on:
   push:
     branches: [main]
@@ -7,10 +7,10 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: pages-${{ github.ref }}
-  cancel-in-progress: false
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -26,21 +26,3 @@ jobs:
       - run: pnpm run build
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm run test:browser
-      - uses: actions/upload-pages-artifact@v4
-        if: github.event_name != 'pull_request'
-        with:
-          path: dist
-  deploy:
-    if: github.event_name != 'pull_request'
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/configure-pages@v5
-      - uses: actions/deploy-pages@v4
-        id: deployment

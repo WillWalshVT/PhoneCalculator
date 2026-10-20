@@ -13,11 +13,13 @@ All computations, variables, settings and worksheet history stay on your device.
 
 ## Publish with GitHub Pages
 
-Use a public GitHub repository. In **Settings → Pages → Build and deployment**, set **Source: GitHub Actions**. Pushing to `main` runs the included workflow, tests the calculator, builds the static files, verifies offline operation in Chromium, and deploys `dist/` to GitHub Pages. Pull requests run the same checks without deploying.
+In **Settings → Pages → Build and deployment**, set **Source: Deploy from a branch**, **Branch: main**, **Folder: / (root)**. The compiled static site is committed at the repository root, and GitHub Pages serves those files directly. The live application is https://WillWalshVT.github.io/PhoneCalculator/ .
+
+The included GitHub Actions workflow runs the math and offline browser tests on pushes and pull requests. It does not control deployment. After editing source, run `pnpm run publish:prepare` and commit both the source and refreshed root assets to `main`. GitHub then publishes that commit.
 
 No custom domain or secrets are required. GitHub supplies HTTPS for the `github.io` address. All asset references, manifest paths and service worker caches are relative to the repository directory, so a project site such as `https://OWNER.github.io/REPOSITORY/` works without build configuration.
 
-The repository includes source and a lockfile. The workflow builds all dependencies into the published JavaScript; no runtime CDN is required. The generated `dist/` directory is ignored locally and published as a Pages artifact.
+The repository includes source and a lockfile. The workflow builds all dependencies into the published JavaScript; no runtime CDN is required. The generated `dist/` directory is ignored locally; `publish:prepare` copies its publishable assets into the repository root.
 
 ## Calculator
 
@@ -65,7 +67,7 @@ The browser test starts and stops its own temporary static preview at `/phasor-c
 - `public/sw.js`: complete versioned offline cache, scoped to this Pages project.
 - `public/manifest.webmanifest`: Home Screen app metadata.
 - `scripts/build.mjs`: bundles dependencies and hashes the static app for cache updates.
-- `.github/workflows/pages.yml`: tests, static build and GitHub Pages deployment.
+- `.github/workflows/pages.yml`: continuous math, build and offline browser checks.
 
 Updates download when the app is opened online. A new cache activates only after all application files are saved; old caches for this project are then cleaned up. Other projects on the same `github.io` origin keep their caches. User history and variables remain in localStorage.
 
