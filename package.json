@@ -1,0 +1,21 @@
+{
+  "name": "phasor-calculator",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "start": "node scripts/preview.mjs",
+    "dev": "node scripts/build.mjs && node scripts/preview.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "test:browser": "node tests/browser.mjs"
+  },
+  "dependencies": {
+    "mathjs": "14.8.1",
+    "qrcode": "1.5.4"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.11",
+    "@playwright/test": "1.56.1"
+  }
+}
