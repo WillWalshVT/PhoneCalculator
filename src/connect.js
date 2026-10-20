@@ -1,8 +1,8 @@
 // The app runs immediately; offline installation happens independently.
 try {
-  await import('./app.js');
+  if(location.pathname.endsWith('/calculator.html'))await import('./app.js');else await import('./library.js');
   if ('serviceWorker' in navigator && isSecureContext) {
-    const registration = await navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' });
+    const registration = await navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none', type: 'module' });
     const notify = () => window.dispatchEvent(new Event('phasor-offline-change'));
     const watch = worker => worker?.addEventListener('statechange', notify);
     watch(registration.installing);

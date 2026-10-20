@@ -8,12 +8,21 @@ importers:
 
   .:
     dependencies:
+      es-module-lexer:
+        specifier: 1.7.0
+        version: 1.7.0
+      jsqr:
+        specifier: 1.4.0
+        version: 1.4.0
       mathjs:
         specifier: 14.8.1
         version: 14.8.1
       qrcode:
         specifier: 1.5.4
         version: 1.5.4
+      trystero:
+        specifier: 0.25.4
+        version: 0.25.4
     devDependencies:
       '@playwright/test':
         specifier: 1.56.1
@@ -184,10 +193,19 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@noble/secp256k1@3.2.0':
+    resolution: {integrity: sha512-Z3ZAWOTxJ0EuTuZTi7Y69iK7GgrLHh8sgm45lVDhg/b3Nk1TpAiKhick2KkZisHuupeepSkyIydN/J459SdX1w==}
+
   '@playwright/test@1.56.1':
     resolution: {integrity: sha512-vSMYtL/zOcFpvJCW71Q/OEGQb7KYBPAdKh35WNSkaZA75JlAO8ED8UN6GUNTm3drWomcbcqRPFqQbLae8yBTdg==}
     engines: {node: '>=18'}
     hasBin: true
+
+  '@trystero-p2p/core@0.25.4':
+    resolution: {integrity: sha512-ehvSL1FqW962XyEctXngeDF/IOM1bWmfCKBNR4vwmVa0JGfM0+dlY4TEzSEGghYp3qqGCrpFIVTxdvlBUGVO6Q==}
+
+  '@trystero-p2p/nostr@0.25.4':
+    resolution: {integrity: sha512-QDox1VVHl0ro/CLfQVUtMS9EQbtJhQM7CCsO4SGv9KrPBT+x3bmOqQ4Y6iugsLzQ6sW+a2cwUTxjDRz/BywqMg==}
 
   ansi-regex@5.0.1:
     resolution: {integrity: sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ==}
@@ -227,6 +245,9 @@ packages:
   emoji-regex@8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}
 
+  es-module-lexer@1.7.0:
+    resolution: {integrity: sha512-jEQoCwk8hyb2AZziIOLhDqpm5+2ww5uIE6lkO/6jcOCusfk6LhMHpXXfBLXTZ7Ydyt0j4VoUQv6uGNYbdW+kBA==}
+
   esbuild@0.25.11:
     resolution: {integrity: sha512-KohQwyzrKTQmhXDW1PjCv3Tyspn9n5GcY2RTDqeORIdIJY8yKIF7sTSopFmn/wpMPW4rdPXI0UE5LJLuq3bx0Q==}
     engines: {node: '>=18'}
@@ -257,6 +278,9 @@ packages:
 
   javascript-natural-sort@0.7.1:
     resolution: {integrity: sha512-nO6jcEfZWQXDhOiBtG2KvKyEptz7RVbpGP4vTD2hLBdmNQSsCiicO2Ioinv6UI4y9ukqnBpy+XZ9H6uLNgJTlw==}
+
+  jsqr@1.4.0:
+    resolution: {integrity: sha512-dxLob7q65Xg2DvstYkRpkYtmKm2sPJ9oFhrhmudT1dZvNFFTlroai3AWSpLey/w5vMcLBXRgOJsbXpdN9HzU/A==}
 
   locate-path@5.0.0:
     resolution: {integrity: sha512-t7hw9pI+WvuwNJXwk5zVHpyhIqzg2qTlklJOf0mVxGSbe3Fp2VieZcduNYjaLDoy6p9uGpQEGWG87WpMKlNq8g==}
@@ -325,6 +349,9 @@ packages:
 
   tiny-emitter@2.1.0:
     resolution: {integrity: sha512-NB6Dk1A9xgQPMoGqC5CVXn123gWyte215ONT5Pp5a0yt4nlEoO1ZWeCwpncaekPHXO60i47ihFnZPiRPjRMq4Q==}
+
+  trystero@0.25.4:
+    resolution: {integrity: sha512-tFYn/fO1kBeSKLUxRPKHH2n5jIuz9zlPPF9SmCVrGBiPNDGtFZyHuQONMUwftnCclTWlVsLoTus5/6eHhVEg+Q==}
 
   typed-function@4.2.2:
     resolution: {integrity: sha512-VwaXim9Gp1bngi/q3do8hgttYn2uC3MoT/gfuMWylnj1IeZBUAyPddHZlo1K05BDoj8DYPpMdiHqH1dDYdJf2A==}
@@ -430,9 +457,18 @@ snapshots:
   '@esbuild/win32-x64@0.25.11':
     optional: true
 
+  '@noble/secp256k1@3.2.0': {}
+
   '@playwright/test@1.56.1':
     dependencies:
       playwright: 1.56.1
+
+  '@trystero-p2p/core@0.25.4': {}
+
+  '@trystero-p2p/nostr@0.25.4':
+    dependencies:
+      '@noble/secp256k1': 3.2.0
+      '@trystero-p2p/core': 0.25.4
 
   ansi-regex@5.0.1: {}
 
@@ -463,6 +499,8 @@ snapshots:
   dijkstrajs@1.0.3: {}
 
   emoji-regex@8.0.0: {}
+
+  es-module-lexer@1.7.0: {}
 
   esbuild@0.25.11:
     optionalDependencies:
@@ -510,6 +548,8 @@ snapshots:
   is-fullwidth-code-point@3.0.0: {}
 
   javascript-natural-sort@0.7.1: {}
+
+  jsqr@1.4.0: {}
 
   locate-path@5.0.0:
     dependencies:
@@ -574,6 +614,10 @@ snapshots:
       ansi-regex: 5.0.1
 
   tiny-emitter@2.1.0: {}
+
+  trystero@0.25.4:
+    dependencies:
+      '@trystero-p2p/nostr': 0.25.4
 
   typed-function@4.2.2: {}
 

@@ -1,33 +1,31 @@
-const PREFIX = `phasor-static:${self.registration.scope}:`;
-const CACHE = PREFIX + 'e5be02c092224e2b959cab4cf5bbac7452b13de52e36b133e716b344cf0a79b1';
-const assets = ['./', './index.html', './connect.js', './app.js', './style.css', './manifest.webmanifest', './icon.png', './icon-maskable.png'];
-const urls = assets.map(path => new URL(path, self.registration.scope).href);
-self.addEventListener('install', event => event.waitUntil((async () => {
+// src/sw.js
+var PREFIX = `phasor-static:${self.registration.scope}:`;
+var CACHE = PREFIX + "a008c8ed964e659a247f513192c5be055782b88ecce9d506b37432b2c07eac2c";
+var assets = ["./","./app.js","./calculator.html","./connect.js","./icon-maskable.png","./icon.png","./index.html","./library.js","./manifest.webmanifest","./pairing.js","./scanner.js","./style.css"];
+var urls = assets.map((p) => new URL(p, self.registration.scope).href);
+self.addEventListener("install", (e) => e.waitUntil((async () => {
   const cache = await caches.open(CACHE);
-  // Installation must finish before this version replaces the working offline app.
-  await cache.addAll(urls.map(url => new Request(url, { cache: 'reload' })));
+  await cache.addAll(urls.map((u) => new Request(u, { cache: "reload" })));
   await self.skipWaiting();
 })()));
-self.addEventListener('activate', event => event.waitUntil((async () => {
-  for (const key of await caches.keys()) if (key.startsWith(PREFIX) && key !== CACHE) await caches.delete(key);
+self.addEventListener("activate", (e) => e.waitUntil((async () => {
+  for (const k of await caches.keys()) if (k.startsWith(PREFIX) && k !== CACHE) await caches.delete(k);
   await self.clients.claim();
 })()));
-self.addEventListener('message', event => {
-  if (event.data?.type !== 'STATUS') return;
-  event.waitUntil((async () => {
-    const cache = await caches.open(CACHE);
-    const ready = (await Promise.all(urls.map(url => cache.match(url)))).every(Boolean);
-    event.ports[0]?.postMessage({ ready });
+self.addEventListener("message", (e) => {
+  if (e.data?.type === "STATUS") e.waitUntil((async () => {
+    const c = await caches.open(CACHE);
+    e.ports[0]?.postMessage({ ready: (await Promise.all(urls.map((u) => c.match(u)))).every(Boolean) });
   })());
 });
-self.addEventListener('fetch', event => {
-  const url = new URL(event.request.url);
-  if (event.request.method !== 'GET' || !url.href.startsWith(self.registration.scope)) return;
-  event.respondWith((async () => {
+self.addEventListener("fetch", (e) => {
+  const u = new URL(e.request.url);
+  if (e.request.method !== "GET" || !u.href.startsWith(self.registration.scope)) return;
+  e.respondWith((async () => {
     const cache = await caches.open(CACHE);
-    const home = new URL('./', self.registration.scope);
-    const isHome = url.pathname === home.pathname || url.pathname === home.pathname + 'index.html';
-    const cached = await cache.match(event.request.mode === 'navigate' && isHome ? home.href : event.request);
-    return cached || fetch(event.request);
+    const home = new URL("./", self.registration.scope);
+    const path = u.pathname === home.pathname || u.pathname === home.pathname + "index.html" ? home.href : u.origin + u.pathname;
+    const cached = await cache.match(path);
+    return cached || fetch(e.request);
   })());
 });

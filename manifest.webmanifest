@@ -1,7 +1,7 @@
 {
   "id": "./",
-  "name": "Phasor Scientific Calculator",
-  "short_name": "Phasor",
+  "name": "Pocket Library",
+  "short_name": "Pocket",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -20,5 +20,6 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ]
+  ],
+  "description": "Your private offline HTML and JavaScript app library"
 }

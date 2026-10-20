@@ -15,7 +15,7 @@ try {
  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
  const page=await context.newPage();const errors=[],requests=[];
  page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>requests.push(r.url()));
- await page.goto(base);await page.locator('#expression').waitFor();await page.getByText('● Offline ready').waitFor();
+ await page.goto(base+'calculator.html');await page.locator('#expression').waitFor();await page.getByText('● Offline ready').waitFor();
  await page.locator('#expression').fill('(3+4j)*(2-j)');await page.locator('[data-key="enter"]').click();
  assert.equal(await page.locator('.past-result').last().textContent(),'10 + 5j');
  await page.locator('#form').click();assert.match(await page.locator('.past-result').last().textContent(),/11.18033989 ∠ 26.56505118°/);
@@ -26,7 +26,7 @@ try {
  assert.ok(await page.locator('#install-qr').evaluate(c=>c.width>0));
  await page.locator('#install-close').click();
  await page.screenshot({path:'tests/phone-preview.png',fullPage:true});
- await context.setOffline(true);await page.goto(base+'?from=home-screen');await page.locator('#expression').waitFor();await page.getByText('● Offline ready').waitFor();
+ await context.setOffline(true);await page.goto(base+'calculator.html?from=home-screen');await page.locator('#expression').waitFor();await page.getByText('● Offline ready').waitFor();
  await page.locator('#expression').fill('parallel(100,100)');await page.locator('[data-key="enter"]').click();assert.match(await page.locator('.past-result').last().textContent(),/50 ∠ 0°/);
  await page.locator('#expression').fill('im(z)');await page.locator('[data-key="enter"]').click();assert.match(await page.locator('.past-result').last().textContent(),/5 ∠ 0°/);
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
@@ -36,7 +36,7 @@ try {
  if(!external){
   originalSW=await readFile('dist/sw.js','utf8');
   await page.evaluate(async()=>{const c=await caches.open('unrelated-app');await c.put('/unrelated',new Response('keep'));});
-  await writeFile('dist/sw.js',originalSW.replace(/PREFIX \+ '[a-f0-9]+'/,'PREFIX + \'integration-update\''));
+  await writeFile('dist/sw.js',originalSW.replace(/PREFIX \+ "[a-f0-9]+"/,'PREFIX + "integration-update"'));
   await page.evaluate(async()=>{const reg=await navigator.serviceWorker.getRegistration();await reg.update();});
   await page.waitForFunction(async()=>{const names=await caches.keys();return names.some(n=>n.endsWith(':integration-update'))&&names.filter(n=>n.startsWith('phasor-static:')).length===1;});
   assert.ok(await page.evaluate(async()=>!!await caches.match('/unrelated')),'Updates preserve other apps on this origin');
