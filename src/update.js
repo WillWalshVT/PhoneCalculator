@@ -13,6 +13,6 @@ export async function updateApp(progress){
   do{if(navigator.serviceWorker.controller)info=await request(navigator.serviceWorker.controller,{type:'STATUS'},null,2000).catch(()=>null);if(info?.appUpdates)break;await new Promise(r=>setTimeout(r,250));}while(Date.now()<limit);
   if(!info?.appUpdates)throw Error('The AppLauncher engine could not update. Check your connection and retry.');
   await request(navigator.serviceWorker.controller,{type:'APP_UPDATE',id:'phasor-calculator',source},progress);
-  progress('Updated. Reopening calculator…');location.reload();
+  progress('Updated. Reopening calculator…');window.top.location.reload();
  }finally{updating=false;}
 }

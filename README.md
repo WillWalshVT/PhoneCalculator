@@ -39,11 +39,11 @@ node /path/to/AppLauncher/scripts/validate-app.mjs /path/to/PhoneCalculator/dist
 
 The history starts blank, with alternating gray rows and a separate cream active-expression area. DEG/RAD and rectangular/polar display controls sit at the top; settings and functions are reached through **menu**. The gray/slate keypad follows the supplied Ink wash palette. The calculator icon is drawn in `public/icon.svg`, with a matching PNG for installation.
 
-- **2nd → ÷** inserts a stacked numerator/denominator template at the caret (or wraps the current selection). Fill the numerator, use **⇥** to move to the denominator, then **⇥** again to leave the fraction. A template can go in either slot of another fraction.
-- **^** enters an editable exponent. Type the whole exponent, including sums, fractions or nested powers; **⇥** leaves it. For example `2` → `^` → `3` → `^` → `2` evaluates as `2^(3^2) = 512`. Exit the first exponent before another `^` for `(2^3)^2 = 64`.
-- Tap a slot directly or use **⇤ / ⇥** to move between structural groups. A hardware keyboard supports normal mathfield navigation and Enter. Undo and backspace edit the current expression. Empty slots produce an error without adding a history entry.
-- The four-by-four number pad contains numbers, decimal, arithmetic and Enter. The ordinary **÷** key inserts inline division. **x²** squares the preceding base; its 2nd function opens a square-root template.
-- **2nd → ^** inserts an indexed root. **2nd → ln** enters eˣ. Parentheses become square grouping brackets under 2nd. The complex key shows **j** in rectangular mode and **∠** in polar mode. **2nd → backspace** clears the active expression.
+- **fn → ÷** inserts a stacked numerator/denominator template at the caret (or wraps the current selection). Fill the numerator, use **→** to move to the denominator, then **→** again to leave the fraction. A template can go in either slot of another fraction.
+- **^** enters an editable exponent. Type the whole exponent, including sums, fractions or nested powers; **→** leaves it. For example `2` → `^` → `3` → `^` → `2` evaluates as `2^(3^2) = 512`. Exit the first exponent before another `^` for `(2^3)^2 = 64`.
+- Tap a slot directly or use **← / →** to move one caret position at a time. A hardware keyboard supports normal mathfield navigation and Enter. Menu → Algebra → Undo and backspace edit the current expression. Empty slots produce an error without adding a history entry.
+- The number pad follows the hand-drawn layout: 7/8/9/×, 4/5/6/−, 1/2/3/+, then j (or ∠)/0/decimal/=. The ordinary **÷** key inserts inline division. Square roots remain available under menu → Number.
+- **fn → ^** inserts an indexed root. Exponential and natural-log functions remain under menu → Number. Parentheses become square grouping brackets under fn. The complex key shows **j** in rectangular mode and **∠** in polar mode. **fn → backspace** clears the active expression.
 - Past expressions retain their visual fraction/exponent structure and can be recalled. Past results insert their exact stored complex value. Existing plain-text history remains readable.
 
 ## Calculator functions
@@ -85,3 +85,16 @@ Future updates do not require the laptop or another QR. Builds publish a hashed
 Copies installed before this update button existed need one final transfer to get
 the button. iOS may retain existing Home Screen artwork until the app is re-added;
 web content updates cannot force an OS icon refresh.
+
+The top bar holds **menu**, angle mode and rectangular/polar mode. The first
+keypad row contains **fn**, **trig**, **π** (fn: e), single-position left/right
+arrows and backspace (fn: AC). **trig** opens a compact dropdown with trig,
+inverse-trig and hyperbolic functions. The next row holds power (fn: nth root),
+10ˣ (fn: log), parentheses (fn: square brackets), and division (fn: fraction).
+**fn → =** inserts `ans`, the exact previous result, without evaluating yet.
+Use the arrows or tap the equation to select a fraction/exponent slot.
+
+AppLauncher supplies an opaque fixed surface at the document's top edge and
+forwards safe-area insets into the calculator. This avoids relying only on the
+deprecated Apple status-bar meta tag. Chrome's browser controls and iOS system
+status-bar effects remain native UI; their final appearance needs device testing.

@@ -31,7 +31,7 @@ try {
  const downloadPromise=page.waitForEvent('download');await page.getByRole('button',{name:'Export calculation history'}).click();assert.equal((await downloadPromise).suggestedFilename(),'phasor-history.json');
 
  async function key(k){await page.locator('[data-key="'+k+'"]').click();}
- async function tab(back=false){await page.getByRole('button',{name:back?'Tab backward':'Tab forward',exact:true}).click();}
+ async function tab(back=false){await page.getByRole('button',{name:back?'Move left':'Move right',exact:true}).click();}
  async function clear(){await page.locator('#second').click();await page.locator('#back').click();}
  async function fraction(){await page.locator('#second').click();await key('÷');}
  await clear();await key('1');await key('÷');await key('2');await key('enter');assert.match(await page.locator('.past-result').last().textContent(),/^0.5 ∠/,'Ordinary keypad division');
@@ -43,10 +43,15 @@ try {
  await clear();await page.locator('#form').click();await fraction();await key('1');await tab();await key('2');await key('+');await fraction();await key('3');await tab();await key('4');
  await page.waitForFunction(()=>document.querySelector('#expression').value.includes('4'));await page.evaluate(()=>document.fonts.ready);await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));await page.screenshot({path:'test-results/calculator-structured.png'});await key('enter');assert.equal(await page.locator('.past-result').last().textContent(),'0.3636363636');
  await clear();await page.locator('#second').click();await key('^');await key('3');await tab();await key('8');await key('enter');assert.equal(await page.locator('.past-result').last().textContent(),'2','Indexed root slots');
- await clear();await page.locator('#second').click();await key('ln');await key('1');await key('enter');assert.equal(await page.locator('.past-result').last().textContent(),'2.718281828');
+ await clear();await key('10^');await key('2');await key('enter');assert.equal(await page.locator('.past-result').last().textContent(),'100');
+ await clear();await page.locator('#second').click();await key('10^');await key('1');await key('0');await key('0');await key('enter');assert.equal(await page.locator('.past-result').last().textContent(),'2');
  await clear();await page.locator('#second').click();await key('(');await key('2');await key('+');await key('3');await page.locator('#second').click();await key(')');await key('×');await key('4');await key('enter');assert.equal(await page.locator('.past-result').last().textContent(),'20','Square bracket grouping');
  await clear();await key('−');await key('2');await key('enter');assert.equal(await page.locator('.past-result').last().textContent(),'−2'.replace('−','-'));
  assert.equal(await page.locator('.navigation').count(),0);assert.equal(await page.locator('#keys .key').count(),16);assert.match(await page.locator('[data-key=complex]').textContent(),/j/);await page.locator('#form').click();assert.match(await page.locator('[data-key=complex]').textContent(),/∠/);
+ await clear();await setExpression('123');await page.locator('#expression').evaluate(e=>e.position=-1);const end=await page.locator('#expression').evaluate(e=>e.position);await tab(true);assert.equal(await page.locator('#expression').evaluate(e=>e.position),end-1);await tab();assert.equal(await page.locator('#expression').evaluate(e=>e.position),end,'Arrows move one position');
+ await clear();await page.locator('#trig').click();await page.getByRole('menuitem',{name:'Sine',exact:true}).click();await key('3');await key('0');await key('enter');assert.match(await page.locator('.past-result').last().textContent(),/^0.5 ∠/);
+ await clear();await page.locator('#second').click();await key('enter');assert.match(await page.locator('#expression').evaluate(e=>e.value),/ans/);await key('+');await key('1');await key('enter');assert.match(await page.locator('.past-result').last().textContent(),/^1.5 ∠/,'fn = inserts the previous answer');
+ assert.equal(await page.locator('.modes #menu').count(),1);assert.equal(await page.locator('.tools #menu').count(),0);assert.equal(await page.locator('#function-keys .key').count(),5);assert.equal(await page.locator('#second').textContent(),'fn');
  const colors=await page.locator('.calculation').evaluateAll(es=>es.slice(-2).map(e=>getComputedStyle(e).backgroundColor));assert.notEqual(colors[0],colors[1]);
  await setExpression('123+4j');await page.waitForFunction(()=>document.querySelector('#expression').shadowRoot.querySelector('.ML__cmr'));
  const fonts=await page.locator('#expression').evaluate(e=>[...e.shadowRoot.querySelectorAll('.ML__cmr')].map(x=>getComputedStyle(x).fontFamily));assert.ok(fonts.length);assert.ok(fonts.every(x=>x.includes('KaTeX_SansSerif')));
