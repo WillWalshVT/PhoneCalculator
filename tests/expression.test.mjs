@@ -5,3 +5,6 @@ test('named calculator functions, previous answer and multi-letter variables rou
 test('unfilled slots cannot silently become a calculation',()=>{assert.throws(()=>toExpression(String.raw`\frac{1}{\placeholder{}}`),/empty expression slots/);});
 
 test('inline division, legacy slash history, indexed radicals and square grouping evaluate',()=>{const c=createCalculator();for(const [latex,result]of [[String.raw`1/2`,.5],[String.raw`1\mathbin{/}2`,.5],[String.raw`\sqrt[3]{8}`,2],[String.raw`\sqrt[1+2]{\frac{16}{2}}`,2],[String.raw`\left[2+3\right]4`,20],[String.raw`e^{2}`,Math.exp(2)]])assert.ok(Math.abs(c.evaluate(toExpression(latex))-result)<1e-10,latex);});
+
+test('logarithm bases contain arbitrary nested expressions',()=>{const c=createCalculator();for(const [latex,result] of [[String.raw`\log_{2}\left(8\right)`,3],[String.raw`\log_{1+2}\left(\frac{81}{3}\right)`,3],[String.raw`\log_{2}\left(\log_{3}\left(81\right)\right)`,2],[String.raw`\arcsin\left(0.5\right)`,30]])assert.ok(Math.abs(c.evaluate(toExpression(latex))-result)<1e-10,latex);});
+test('j multiplies implicitly on either side of a value',()=>{const c=createCalculator();for(const text of ['j6','6j','j6+6j','2+j6','j6/2']){const v=c.evaluate(toExpression(toLatex(text)));assert.ok(Number.isFinite(v.re)&&Number.isFinite(v.im),text);}assert.equal(c.evaluate('j6+6j').im,12);});

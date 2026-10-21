@@ -39,11 +39,11 @@ node /path/to/AppLauncher/scripts/validate-app.mjs /path/to/PhoneCalculator/dist
 
 The history starts blank, with alternating gray rows and a separate cream active-expression area. DEG/RAD and rectangular/polar display controls sit at the top; settings and functions are reached through **menu**. The gray/slate keypad follows the supplied Ink wash palette. The calculator icon is drawn in `public/icon.svg`, with a matching PNG for installation.
 
-- **fn → ÷** inserts a stacked numerator/denominator template at the caret (or wraps the current selection). Fill the numerator, use **→** to move to the denominator, then **→** again to leave the fraction. A template can go in either slot of another fraction.
+- **2nd → ÷** inserts a stacked numerator/denominator template at the caret (or wraps the current selection). Fill the numerator, use **→** to move to the denominator, then **→** again to leave the fraction. A template can go in either slot of another fraction.
 - **^** enters an editable exponent. Type the whole exponent, including sums, fractions or nested powers; **→** leaves it. For example `2` → `^` → `3` → `^` → `2` evaluates as `2^(3^2) = 512`. Exit the first exponent before another `^` for `(2^3)^2 = 64`.
 - Tap a slot directly or use **← / →** to move one caret position at a time. A hardware keyboard supports normal mathfield navigation and Enter. Menu → Algebra → Undo and backspace edit the current expression. Empty slots produce an error without adding a history entry.
 - The number pad follows the hand-drawn layout: 7/8/9/×, 4/5/6/−, 1/2/3/+, then j (or ∠)/0/decimal/=. The ordinary **÷** key inserts inline division. Square roots remain available under menu → Number.
-- **fn → ^** inserts an indexed root. Exponential and natural-log functions remain under menu → Number. Parentheses become square grouping brackets under fn. The complex key shows **j** in rectangular mode and **∠** in polar mode. **fn → backspace** clears the active expression.
+- **2nd → ^** inserts an indexed root. The **ln** key inserts natural log; **2nd → ln** inserts a logarithm with editable base and argument. Exponential remains under menu → Number. Parentheses become square grouping brackets under 2nd. The complex key shows **j** in rectangular mode and **∠** in polar mode. **2nd → backspace** clears the active expression.
 - Past expressions retain their visual fraction/exponent structure and can be recalled. Past results insert their exact stored complex value. Existing plain-text history remains readable.
 
 ## Calculator functions
@@ -75,10 +75,11 @@ MathLive is distributed under its included MIT license (`mathlive-LICENSE.txt` i
 ## Update an installed calculator
 
 Choose **menu → Settings & help → Update app** while online. It checks the shared
-AppLauncher engine, downloads the latest published calculator release from this
-repository’s GitHub Pages site with progress, verifies every file and atomically
+AppLauncher engine and compares the installed version with the latest release from this
+repository’s GitHub Pages site. If newer, it downloads with progress, verifies every file and atomically
 replaces the cached calculator. History, variables and settings remain intact;
 failed or incomplete deployments keep the previous version available offline.
+Settings displays the installed semantic version (currently **3.3.0**); an equal or older release reports **App is up to date** without downloading assets or reopening.
 Future updates do not require the laptop or another QR. Builds publish a hashed
 `release.json` file list alongside the app; no separate server is needed.
 
@@ -87,14 +88,18 @@ the button. iOS may retain existing Home Screen artwork until the app is re-adde
 web content updates cannot force an OS icon refresh.
 
 The top bar holds **menu**, angle mode and rectangular/polar mode. The first
-keypad row contains **fn**, **trig**, **π** (fn: e), single-position left/right
-arrows and backspace (fn: AC). **trig** opens a compact dropdown with trig,
-inverse-trig and hyperbolic functions. The next row holds power (fn: nth root),
-10ˣ (fn: log), parentheses (fn: square brackets), and division (fn: fraction).
-**fn → =** inserts `ans`, the exact previous result, without evaluating yet.
+keypad row contains **2nd**, **trig**, **π** (2nd: e), single-position left/right
+arrows and backspace (2nd: AC). **trig** opens a compact dropdown with trig,
+inverse-trig functions in three rows. It opens downward over the keypad; an outside tap closes it without typing. Hyperbolic functions remain in menu → Trigonometry. The next row holds power (2nd: nth root),
+ln (2nd: logₙ), parentheses (2nd: square brackets), and division (2nd: fraction).
+**2nd → =** inserts `ans`, the exact previous result, without evaluating yet.
 Use the arrows or tap the equation to select a fraction/exponent slot.
 
 AppLauncher supplies an opaque fixed surface at the document's top edge and
 forwards safe-area insets into the calculator. This avoids relying only on the
 deprecated Apple status-bar meta tag. Chrome's browser controls and iOS system
 status-bar effects remain native UI; their final appearance needs device testing.
+
+**2nd + ← / →** extends the selection. Parentheses, trig functions, powers and roots wrap selected content. Opening parentheses inserts a matching closing fence, with the caret inside; empty trig functions delete as one unit. Both `j6` and `6j` mean `6*j`.
+
+On installed iOS apps, AppLauncher reserves an additional 20 px below the system chrome to keep the header away from the blur band. The OS overlay itself is outside web content control; physical iPhone verification is still required.

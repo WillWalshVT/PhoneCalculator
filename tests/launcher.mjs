@@ -25,6 +25,10 @@ try{
  await senderContext.close();await phoneContext.close();
  const before=await app.locator('#expression').evaluate(()=>performance.timeOrigin);
  await app.locator('#menu').click();await app.getByRole('button',{name:'7 Settings & help'}).click();await app.getByRole('button',{name:'Update app',exact:false}).click();
+ await app.locator('#message').filter({hasText:'App is up to date'}).waitFor({timeout:90000});assert.equal(await app.locator('#expression').evaluate(()=>performance.timeOrigin),before,'No reload for current release');
+ // Model an older cached release so the second click exercises replacement.
+ await pwa.evaluate(async()=>{const db=await new Promise((resolve,reject)=>{const r=indexedDB.open('app-launcher:/AppLauncher/',2);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});await new Promise((resolve,reject)=>{const tx=db.transaction('apps','readwrite'),store=tx.objectStore('apps'),r=store.get('phasor-calculator');r.onsuccess=()=>{const app=r.result;app.appVersion='3.2.0';app.releaseVersion='a'.repeat(64);store.put(app);};tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});db.close();});
+ await app.locator('#menu').click();await app.getByRole('button',{name:'7 Settings & help'}).click();await app.getByRole('button',{name:'Update app',exact:false}).click();
  await pwa.waitForFunction(before=>document.querySelector('#app-frame')?.contentWindow.performance.timeOrigin>before,before,{timeout:90000});await app.locator('#expression').waitFor();
  await app.locator('#expression').evaluate((e,l)=>e.setValue(l),toLatex('abs(z)'));await app.locator('[data-key="enter"]').click();assert.equal(await app.locator('.past-result').last().textContent(),'5','Hosted update preserves exact complex variables');
  console.log('Installed calculator Update app button fetched and verified the live GitHub release.');

@@ -11,7 +11,7 @@ export function createCalculator(){
  math.import({...trig,factorial:n=>{if(!Number.isInteger(n)||n<0||n>170)throw Error('Factorial requires an integer from 0 to 170.');return raw.factorial(n);},atan2:(y,x)=>Math.atan2(y,x)/scale(),arg:z=>raw.arg(z)/scale(),phase:z=>raw.arg(z)/scale(),polar:(r,t)=>math.multiply(r,math.exp(math.complex(0,t*scale()))),rect:(r,t)=>math.multiply(r,math.exp(math.complex(0,t*scale()))),parallel:(...zs)=>math.divide(1,zs.reduce((a,z)=>math.add(a,math.divide(1,z)),0)),rms:z=>math.divide(z,Math.sqrt(2)),db:x=>20*Math.log10(math.abs(x)),db10:x=>10*Math.log10(math.abs(x)),fromdb:x=>10**(x/20)},{override:true});
  function evaluate(input){
   if(input.length>2000)throw Error('Expression is too long.');
-  let text=input.trim().replaceAll('×','*').replaceAll('÷','/').replaceAll('−','-').replaceAll('π','pi').replaceAll('√','sqrt').replace(/\bln\s*\(/g,'log(').replace(/\blog10\s*\(/g,'log10(');
+  let text=input.trim().replace(/\bj(?=\d)/g,'j*').replaceAll('×','*').replaceAll('÷','/').replaceAll('−','-').replaceAll('π','pi').replaceAll('√','sqrt').replace(/\bln\s*\(/g,'log(').replace(/\blog10\s*\(/g,'log10(');
   // a∠b is deliberately bounded to numeric literals; use polar(expr,expr) for expressions.
   text=text.replace(/((?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)\s*∠\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)/gi,'polar($1,$2)');
   const tree=math.parse(text);

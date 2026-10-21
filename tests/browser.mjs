@@ -43,15 +43,41 @@ try {
  await clear();await page.locator('#form').click();await fraction();await key('1');await tab();await key('2');await key('+');await fraction();await key('3');await tab();await key('4');
  await page.waitForFunction(()=>document.querySelector('#expression').value.includes('4'));await page.evaluate(()=>document.fonts.ready);await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));await page.screenshot({path:'test-results/calculator-structured.png'});await key('enter');assert.equal(await page.locator('.past-result').last().textContent(),'0.3636363636');
  await clear();await page.locator('#second').click();await key('^');await key('3');await tab();await key('8');await key('enter');assert.equal(await page.locator('.past-result').last().textContent(),'2','Indexed root slots');
- await clear();await key('10^');await key('2');await key('enter');assert.equal(await page.locator('.past-result').last().textContent(),'100');
- await clear();await page.locator('#second').click();await key('10^');await key('1');await key('0');await key('0');await key('enter');assert.equal(await page.locator('.past-result').last().textContent(),'2');
+ await clear();await key('ln');await key('1');await key('enter');assert.equal(await page.locator('.past-result').last().textContent(),'0');
+ await clear();await page.locator('#second').click();await key('ln');await key('2');await tab();await tab();await key('8');await key('enter');assert.equal(await page.locator('.past-result').last().textContent(),'3','Editable logarithm base and argument');
  await clear();await page.locator('#second').click();await key('(');await key('2');await key('+');await key('3');await page.locator('#second').click();await key(')');await key('×');await key('4');await key('enter');assert.equal(await page.locator('.past-result').last().textContent(),'20','Square bracket grouping');
  await clear();await key('−');await key('2');await key('enter');assert.equal(await page.locator('.past-result').last().textContent(),'−2'.replace('−','-'));
  assert.equal(await page.locator('.navigation').count(),0);assert.equal(await page.locator('#keys .key').count(),16);assert.match(await page.locator('[data-key=complex]').textContent(),/j/);await page.locator('#form').click();assert.match(await page.locator('[data-key=complex]').textContent(),/∠/);
  await clear();await setExpression('123');await page.locator('#expression').evaluate(e=>e.position=-1);const end=await page.locator('#expression').evaluate(e=>e.position);await tab(true);assert.equal(await page.locator('#expression').evaluate(e=>e.position),end-1);await tab();assert.equal(await page.locator('#expression').evaluate(e=>e.position),end,'Arrows move one position');
- await clear();await page.locator('#trig').click();await page.getByRole('menuitem',{name:'Sine',exact:true}).click();await key('3');await key('0');await key('enter');assert.match(await page.locator('.past-result').last().textContent(),/^0.5 ∠/);
- await clear();await page.locator('#second').click();await key('enter');assert.match(await page.locator('#expression').evaluate(e=>e.value),/ans/);await key('+');await key('1');await key('enter');assert.match(await page.locator('.past-result').last().textContent(),/^1.5 ∠/,'fn = inserts the previous answer');
- assert.equal(await page.locator('.modes #menu').count(),1);assert.equal(await page.locator('.tools #menu').count(),0);assert.equal(await page.locator('#function-keys .key').count(),5);assert.equal(await page.locator('#second').textContent(),'fn');
+ await clear();await page.locator('#trig').click();await page.getByRole('menuitem',{name:'sin()',exact:true}).click();await key('3');await key('0');await key('enter');assert.match(await page.locator('.past-result').last().textContent(),/^0.5 ∠/);
+ // Popup sits below its trigger; dismissal consumes the entire gesture.
+ await clear();await page.locator('#trig').click();
+ const trigger=await page.locator('#trig').boundingBox(),popup=await page.locator('#trig-list').boundingBox();assert.ok(popup.y>=trigger.y+trigger.height);
+ assert.deepEqual(await page.locator('#trig-list button').allTextContents(),['sin()','sin⁻¹()','cos()','cos⁻¹()','tan()','tan⁻¹()']);
+ await page.screenshot({path:'test-results/calculator-trig-menu.png'});
+ await key('0');assert.equal(await page.locator('#expression').evaluate(e=>e.value),'','Dismissal does not type zero');assert.equal(await page.locator('#trig-list').isVisible(),false);
+ await key('0');assert.equal(await page.locator('#expression').evaluate(e=>e.value),'0','Following gesture types normally');
+ await clear();await page.locator('#trig').click();await page.locator('#trig').click();assert.equal(await page.locator('#trig-list').isVisible(),false);
+ await page.locator('#trig').click();await page.getByRole('menuitem',{name:'sin()',exact:true}).click();await key('3');await page.locator('#back').click();await page.locator('#back').click();assert.equal(await page.locator('#expression').evaluate(e=>e.value),'','Empty trig deletes as one unit');
+ await page.locator('#trig').click();await page.getByRole('menuitem',{name:'sin()',exact:true}).click();await key('3');await page.locator('#expression').press('Backspace');await page.locator('#expression').press('Backspace');assert.equal(await page.locator('#expression').evaluate(e=>e.value),'','Keyboard removes empty trig as a unit');
+ await key('(');await key('2');await key('+');await key('3');await key('enter');assert.match(await page.locator('.past-result').last().textContent(),/^5 ∠/,'Parentheses close automatically');
+ // 2nd arrows extend selection, and templates wrap that selection.
+ for(const mode of ['parenthesis','trig','power','root','log']){
+  await clear();await setExpression('2+3');await page.locator('#expression').evaluate(e=>e.position=-1);await page.locator('#second').click();await tab(true);await tab(true);await tab(true);
+  assert.ok(await page.locator('#expression').evaluate(e=>e.selection.ranges.some(([a,b])=>a!==b)));
+  if(mode==='parenthesis'){await page.locator('#second').click();await key('(');await key('×');await key('2');}
+  if(mode==='trig'){await page.locator('#trig').click();await page.getByRole('menuitem',{name:'cos()',exact:true}).click();}
+  if(mode==='power'){await page.locator('#second').click();await key('^');await key('2');}
+  if(mode==='root'){await key('^');await key('2');}
+  if(mode==='log'){await key('ln');await key('2');}
+  await key('enter');assert.equal(await page.locator('#message').textContent(),'','Wrapping '+mode+' evaluates');
+  const result=await page.locator('.past-result').last().textContent();assert.match(result,new RegExp('^'+({parenthesis:'10',trig:'0.9961946981',power:'25',root:'2.236067977',log:'2.321928095'}[mode]).replace('.','\\.')));
+ }
+ await clear();await setExpression('j6+6j');await key('enter');assert.match(await page.locator('.past-result').last().textContent(),/^12 ∠ 90/);
+ // Restore previous answer fixture for the following check.
+ await calculate('0.5');
+ await clear();await page.locator('#second').click();await key('enter');assert.match(await page.locator('#expression').evaluate(e=>e.value),/ans/);await key('+');await key('1');await key('enter');assert.match(await page.locator('.past-result').last().textContent(),/^1.5 ∠/,'2nd = inserts the previous answer');
+ assert.equal(await page.locator('.modes #menu').count(),1);assert.equal(await page.locator('.tools #menu').count(),0);assert.equal(await page.locator('#function-keys .key').count(),5);assert.equal(await page.locator('#second').textContent(),'2nd');
  const colors=await page.locator('.calculation').evaluateAll(es=>es.slice(-2).map(e=>getComputedStyle(e).backgroundColor));assert.notEqual(colors[0],colors[1]);
  await setExpression('123+4j');await page.waitForFunction(()=>document.querySelector('#expression').shadowRoot.querySelector('.ML__cmr'));
  const fonts=await page.locator('#expression').evaluate(e=>[...e.shadowRoot.querySelectorAll('.ML__cmr')].map(x=>getComputedStyle(x).fontFamily));assert.ok(fonts.length);assert.ok(fonts.every(x=>x.includes('KaTeX_SansSerif')));
