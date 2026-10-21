@@ -22,7 +22,13 @@ try{
  const app=pwa.frameLocator('#app-frame');await app.locator('#expression').waitFor({timeout:90000});
  await app.locator('#expression').evaluate((e,l)=>e.setValue(l),toLatex('z=3+4j'));await app.locator('[data-key="enter"]').click();assert.equal(await app.locator('.past-result').last().textContent(),'3 + 4j');
  assert.equal(await pwa.locator('.shell,.toast').count(),0,'All transfer controls disappear');
- await senderContext.close();await phoneContext.close();await pwaContext.setOffline(true);await pwa.reload();await app.locator('#expression').waitFor();
+ await senderContext.close();await phoneContext.close();
+ const before=await app.locator('#expression').evaluate(()=>performance.timeOrigin);
+ await app.locator('#menu').click();await app.getByRole('button',{name:'7 Settings & help'}).click();await app.getByRole('button',{name:'Update app',exact:false}).click();
+ await pwa.waitForFunction(before=>document.querySelector('#app-frame')?.contentWindow.performance.timeOrigin>before,before,{timeout:90000});await app.locator('#expression').waitFor();
+ await app.locator('#expression').evaluate((e,l)=>e.setValue(l),toLatex('abs(z)'));await app.locator('[data-key="enter"]').click();assert.equal(await app.locator('.past-result').last().textContent(),'5','Hosted update preserves exact complex variables');
+ console.log('Installed calculator Update app button fetched and verified the live GitHub release.');
+ await pwaContext.setOffline(true);await pwa.reload();await app.locator('#expression').waitFor();
  await app.locator('#expression').evaluate((e,l)=>e.setValue(l),toLatex('abs(z)'));await app.locator('[data-key="enter"]').click();assert.equal(await app.locator('.past-result').last().textContent(),'5');
  await app.locator('#form').click();await app.locator('#expression').evaluate((e,l)=>e.setValue(l),toLatex('parallel(100,100)'));await app.locator('[data-key="enter"]').click();assert.equal(await app.locator('.past-result').last().textContent(),'50 ∠ 0°');
  assert.deepEqual(errors,[]);
