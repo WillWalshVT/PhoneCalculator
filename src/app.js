@@ -1,4 +1,5 @@
 import {MathfieldElement,convertLatexToMarkup} from 'mathlive';
+import {moveFunctionCaret,deleteFunctionBoundary} from './function-editing.js';
 import {createCalculator} from './engine.js';
 import {toLatex,toExpression} from './expression.js';
 import {APP_VERSION,updateApp} from './update.js';
@@ -50,23 +51,9 @@ const mathStyle=document.createElement('style');mathStyle.textContent=mathTypogr
 const historyStyle=document.createElement('style');historyStyle.textContent=mathTypography;document.head.append(historyStyle);
 function insert(text){if(/^[A-Za-z][A-Za-z0-9_]*\($/.test(text)){const name=text.slice(0,-1);latex(({sin:'\\sin',cos:'\\cos',tan:'\\tan',asin:'\\arcsin',acos:'\\arccos',atan:'\\arctan',log:'\\ln'}[name]||toLatex(name))+'\\left(#0\\right)');}else input.insert(toLatex(text),{format:'latex',selectionMode:'after',focus:true});$('#message').textContent='';}
 function latex(text,selectionMode='placeholder'){input.insert(text,{format:'latex',selectionMode,focus:true});$('#message').textContent='';}
-function command(name){input.executeCommand(name);if(name==='moveToNextGroup'||name==='moveToPreviousGroup')input.position=Math.max(...input.selection.ranges.flat());input.focus();}
-// Use public atom offsets to remove an empty function and its fence together.
-// This also works inside fractions, powers and another function's argument.
-function deleteBackward(){
- const range=input.selection.ranges[0],position=input.position;
- for(let end=1;end<=input.lastOffset;end++){
-  const fence=input.getElementInfo(end);if(!/^\\left\((?:\\placeholder\{\})?\\right\)$/.test(fence?.latex||''))continue;
-  const first=end-(fence.latex.includes('placeholder')?2:1);
-  if(position<first||position>end||range[0]<first)continue;
-  const fnEnd=first-1,fn=input.getElementInfo(fnEnd);
-  if(!/^(?:\\(?:sin|cos|tan|arcsin|arccos|arctan|ln|log)|\\operatorname\{(?:\\mathrm\{)?(?:sin|cos|tan|asin|acos|atan|sinh|cosh|tanh|log|log10)\}?\})$/.test(fn?.latex||''))continue;
-  let start=fnEnd-1;while(start>0&&input.getElementInfo(start)?.depth>fn.depth)start--;
-  input.selection={ranges:[[start,end]]};command('deleteBackward');return;
- }
- command('deleteBackward');
-}
-function renderHistory(){const box=$('#history');box.replaceChildren();history.forEach(h=>{const row=document.createElement('div');row.className='calculation';const expression=document.createElement('button');expression.className='past-expression';expression.setAttribute('aria-label','Recall '+h.expression);if(h.latex)expression.innerHTML=convertLatexToMarkup(h.latex);else expression.textContent=h.expression;expression.onclick=()=>{input.setValue(h.latex||toLatex(h.expression));input.focus();input.position=-1;};const value=document.createElement('button');value.className='past-result';value.textContent=calc.format(calc.restore(h.value),settings.form,settings.precision);value.setAttribute('aria-label','Insert result '+value.textContent);value.onclick=()=>insert(`(${h.value.re}+(${h.value.im})j)`);row.append(expression,value);box.append(row);});box.scrollTop=box.scrollHeight;}
+function command(name){if(!(['moveToNextChar','moveToPreviousChar'].includes(name)&&moveFunctionCaret(input,name==='moveToNextChar')))input.executeCommand(name);if(name==='moveToNextGroup'||name==='moveToPreviousGroup')input.position=Math.max(...input.selection.ranges.flat());input.focus();}
+function deleteBackward(){if(!deleteFunctionBoundary(input)){if(input.selection.ranges.some(([a,b])=>a!==b))input.insert('',{format:'latex',selectionMode:'after',focus:true});else command('deleteBackward');}else input.focus();}
+function renderHistory(){const box=$('#history');box.replaceChildren();history.forEach(h=>{const row=document.createElement('div');row.className='calculation';const expression=document.createElement('button');expression.className='past-expression';expression.setAttribute('aria-label','Recall '+h.expression);if(h.latex)expression.innerHTML=convertLatexToMarkup(h.latex);else expression.textContent=h.expression;expression.onclick=()=>{input.setValue(h.latex||toLatex(h.expression));input.focus();input.position=-1;};const value=document.createElement('button');value.className='past-result';value.textContent=calc.format(calc.restore(h.value),settings.form,settings.precision);value.setAttribute('aria-label','Insert result '+value.textContent);value.onclick=()=>insert(calc.recall(h.value));row.append(expression,value);box.append(row);});box.scrollTop=box.scrollHeight;}
 function run(){if(!input.value.trim())return;try{const expression=toExpression(input.getValue('latex'));const value=calc.evaluate(expression);history.push({expression,latex:input.getValue('latex'),value:calc.serialize(value)});history=history.slice(-100);input.value='';$('#message').textContent='';save();renderHistory();}catch(err){$('#message').textContent=err.message.replace(/^Error:\s*/,'');}}
 function press(key){
  if(key==='enter')run();
@@ -96,7 +83,7 @@ $('.controls').onclick=e=>{const button=e.target.closest('[data-key]');if(!butto
 $('#back').onclick=()=>{if(second){press('AC');second=false;drawKeys();}else deleteBackward();};
 $('.tools').addEventListener('click',e=>{const button=e.target.closest('[data-command]');if(button)command(second?(button.dataset.command==='moveToPreviousChar'?'extendSelectionBackward':'extendSelectionForward'):button.dataset.command);});
 $('#second').onclick=()=>{second=!second;drawKeys();};
-input.addEventListener('keydown',e=>{if(e.key==='Backspace'){e.preventDefault();e.stopPropagation();deleteBackward();}if(e.key==='Enter'){e.preventDefault();e.stopPropagation();run();}});
+input.addEventListener('keydown',e=>{if(e.key==='Backspace'){e.preventDefault();e.stopPropagation();deleteBackward();}else if(['ArrowLeft','ArrowRight'].includes(e.key)&&!e.shiftKey&&!e.altKey&&!e.ctrlKey&&!e.metaKey){e.preventDefault();e.stopPropagation();command(e.key==='ArrowRight'?'moveToNextChar':'moveToPreviousChar');}else if(e.key==='Enter'){e.preventDefault();e.stopPropagation();run();}},true);
 input.addEventListener('input',()=>{$('#message').textContent='';});
 function setting(action){if(action==='undo'){command('undo');return;}if(action==='exponential'){press('e^');return;}if(action==='update'){updateApp(text=>$('#message').textContent=text).catch(e=>$('#message').textContent=e.message);return;}if(action==='fraction'){press('fraction');return;}if(['DEG','RAD'].includes(action)){settings.angle=action;calc.setAngle(action);}else if(['RECT','POLAR'].includes(action))settings.form=action;else if(['10','14'].includes(action))settings.precision=Number(action);else if(action==='clear'){if(!confirm('Clear all calculation history and variables?'))return;history=[];calc.reset();}else if(action==='export'){const a=document.createElement('a');const url=URL.createObjectURL(new Blob([JSON.stringify({settings,history},null,2)],{type:'application/json'}));a.href=url;a.download='phasor-history.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);}save();$('#angle').textContent=settings.angle;$('#angle').setAttribute('aria-label','Angle mode: '+(settings.angle==='DEG'?'degrees':'radians'));$('#form').setAttribute('aria-label','Complex results: '+(settings.form==='RECT'?'rectangular':'polar'));$('#form').textContent=settings.form==='RECT'?'a + bj':'r ∠ θ';renderHistory();drawKeys();}
 $('#angle').onclick=()=>setting(settings.angle==='DEG'?'RAD':'DEG');$('#form').onclick=()=>setting(settings.form==='RECT'?'POLAR':'RECT');

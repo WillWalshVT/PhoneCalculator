@@ -34,7 +34,7 @@ try{
  console.log('Installed calculator Update app button fetched and verified the live GitHub release.');
  await pwaContext.setOffline(true);await pwa.reload();await app.locator('#expression').waitFor();
  await app.locator('#expression').evaluate((e,l)=>e.setValue(l),toLatex('abs(z)'));await app.locator('[data-key="enter"]').click();assert.equal(await app.locator('.past-result').last().textContent(),'5');
- await app.locator('#form').click();await app.locator('#expression').evaluate((e,l)=>e.setValue(l),toLatex('parallel(100,100)'));await app.locator('[data-key="enter"]').click();assert.equal(await app.locator('.past-result').last().textContent(),'50 ∠ 0°');
+ await app.locator('#form').click();await app.locator('#expression').evaluate((e,l)=>e.setValue(l),toLatex('parallel(100,100)'));await app.locator('[data-key="enter"]').click();assert.equal(await app.locator('.past-result').last().textContent(),'50');
  assert.deepEqual(errors,[]);
  console.log('PASS: real signaling/WebRTC, Phasor name/icon discovery, unique install identity, fresh PWA storage transfer, hidden transfer UI, offline restart and persisted complex variables. OS installation itself is not simulated.');
 }finally{await browser.close();}

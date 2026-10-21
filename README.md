@@ -79,7 +79,7 @@ AppLauncher engine and compares the installed version with the latest release fr
 repository’s GitHub Pages site. If newer, it downloads with progress, verifies every file and atomically
 replaces the cached calculator. History, variables and settings remain intact;
 failed or incomplete deployments keep the previous version available offline.
-Settings displays the installed semantic version (currently **3.3.0**); an equal or older release reports **App is up to date** without downloading assets or reopening.
+Settings displays the installed semantic version (currently **3.3.1**); an equal or older release reports **App is up to date** without downloading assets or reopening.
 Future updates do not require the laptop or another QR. Builds publish a hashed
 `release.json` file list alongside the app; no separate server is needed.
 
@@ -103,3 +103,7 @@ status-bar effects remain native UI; their final appearance needs device testing
 **2nd + ← / →** extends the selection. Parentheses, trig functions, powers and roots wrap selected content. Opening parentheses inserts a matching closing fence, with the caret inside; empty trig functions delete as one unit. Both `j6` and `6j` mean `6*j`.
 
 On installed iOS apps, AppLauncher reserves an additional 20 px below the system chrome to keep the header away from the blur band. The OS overlay itself is outside web content control; physical iPhone verification is still required.
+
+Recalled results omit zero components: `90` stays `90`, and a complex value uses grouped implicit multiplication such as `(2+6j)`. Recalled values retain full stored precision. Polar results on the real axis display as ordinary signed numbers; non-real results retain their magnitude and angle.
+
+Logarithms and trig functions navigate as cohesive units. **2nd → ln** starts in the base; **→** moves directly to the argument, and **←** returns to the base from the argument’s start. Arrows skip structural function names and fences, while retaining character movement within each expression. Backspace removes an empty function with its parentheses; an emptied log base remains editable until the whole empty function is removed.

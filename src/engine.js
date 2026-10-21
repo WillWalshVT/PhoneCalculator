@@ -29,9 +29,16 @@ export function createCalculator(){
  }
  function format(value,mode='RECT',precision=10){
   const c=math.complex(value);const imagZero=c.im===0||Math.abs(c.im)<Math.abs(c.re)*1e-14;const realZero=c.re===0||Math.abs(c.re)<Math.abs(c.im)*1e-14;const n=x=>math.format(Object.is(x,-0)?0:x,{precision});
-  if(mode==='POLAR')return `${n(math.abs(c))} ∠ ${n(raw.arg(c)/scale())}${angle==='DEG'?'°':' rad'}`;
   if(imagZero)return n(c.re);
+  if(mode==='POLAR')return `${n(math.abs(c))} ∠ ${n(raw.arg(c)/scale())}${angle==='DEG'?'°':' rad'}`;
   return `${realZero?'':n(c.re)+' '+(c.im<0?'−':'+')+' '}${realZero&&c.im<0?'−':''}${n(Math.abs(c.im))}j`;
  }
- return {evaluate,format,exportState:()=>[...scope].map(([k,v])=>[k,typeof v==='number'?{re:v,im:0}:{re:v.re,im:v.im}]),restoreState:entries=>{for(const [k,v]of entries)if(/^[A-Za-z][A-Za-z0-9_]*$/.test(k)&&Number.isFinite(v.re)&&Number.isFinite(v.im))scope.set(k,v.im===0?v.re:math.complex(v.re,v.im));},setAngle:v=>{angle=v==='RAD'?'RAD':'DEG';},variables:()=>[...scope].filter(([k])=>!['ans','j'].includes(k)),serialize:v=>typeof v==='number'?{re:v,im:0}:{re:v.re,im:v.im},restore:v=>math.complex(v.re,v.im),reset:()=>{scope.clear();scope.set('ans',0);scope.set('j',math.complex(0,1));}};
+ // Recall exact stored values; display precision must never round the input.
+ function recall({re,im}){
+  if(im===0)return String(Object.is(re,-0)?0:re);
+  const imaginary=(im<0?'-':'')+String(Math.abs(im))+'j';
+  if(re===0)return imaginary;
+  return '('+re+(im<0?'-':'+')+Math.abs(im)+'j)';
+ }
+ return {evaluate,format,recall,exportState:()=>[...scope].map(([k,v])=>[k,typeof v==='number'?{re:v,im:0}:{re:v.re,im:v.im}]),restoreState:entries=>{for(const [k,v]of entries)if(/^[A-Za-z][A-Za-z0-9_]*$/.test(k)&&Number.isFinite(v.re)&&Number.isFinite(v.im))scope.set(k,v.im===0?v.re:math.complex(v.re,v.im));},setAngle:v=>{angle=v==='RAD'?'RAD':'DEG';},variables:()=>[...scope].filter(([k])=>!['ans','j'].includes(k)),serialize:v=>typeof v==='number'?{re:v,im:0}:{re:v.re,im:v.im},restore:v=>math.complex(v.re,v.im),reset:()=>{scope.clear();scope.set('ans',0);scope.set('j',math.complex(0,1));}};
 }
