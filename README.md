@@ -37,12 +37,13 @@ node /path/to/AppLauncher/scripts/validate-app.mjs /path/to/PhoneCalculator/dist
 
 ## Expression editing
 
-The borderless cream workspace starts blank. DEG/RAD and rectangular/polar display controls sit at the top; settings and functions are reached through **menu**. The gray/slate keypad follows the supplied Ink wash palette. The calculator icon is drawn in `public/icon.svg`, with a matching PNG for installation.
+The history starts blank, with alternating gray rows and a separate cream active-expression area. DEG/RAD and rectangular/polar display controls sit at the top; settings and functions are reached through **menu**. The gray/slate keypad follows the supplied Ink wash palette. The calculator icon is drawn in `public/icon.svg`, with a matching PNG for installation.
 
-- **2nd → ÷** inserts a stacked numerator/denominator template at the caret (or wraps the current selection). Fill the numerator, use **↓** to move to the denominator, then **→** to leave the fraction. A template can go in either slot of another fraction.
-- **^** enters an editable exponent. Type the whole exponent, including sums, fractions or nested powers; **→** leaves it. For example `2` → `^` → `3` → `^` → `2` evaluates as `2^(3^2) = 512`. Exit the first exponent before another `^` for `(2^3)^2 = 64`.
-- Tap a slot directly or use the four arrow keys below the keypad. A hardware keyboard supports normal mathfield navigation and Enter. Undo and backspace edit the current expression. Empty slots produce an error without adding a history entry.
-- The ordinary **÷** key inserts inline division. **x²** squares the preceding base; its 2nd function opens a square-root template.
+- **2nd → ÷** inserts a stacked numerator/denominator template at the caret (or wraps the current selection). Fill the numerator, use **⇥** to move to the denominator, then **⇥** again to leave the fraction. A template can go in either slot of another fraction.
+- **^** enters an editable exponent. Type the whole exponent, including sums, fractions or nested powers; **⇥** leaves it. For example `2` → `^` → `3` → `^` → `2` evaluates as `2^(3^2) = 512`. Exit the first exponent before another `^` for `(2^3)^2 = 64`.
+- Tap a slot directly or use **⇤ / ⇥** to move between structural groups. A hardware keyboard supports normal mathfield navigation and Enter. Undo and backspace edit the current expression. Empty slots produce an error without adding a history entry.
+- The four-by-four number pad contains numbers, decimal, arithmetic and Enter. The ordinary **÷** key inserts inline division. **x²** squares the preceding base; its 2nd function opens a square-root template.
+- **2nd → ^** inserts an indexed root. **2nd → ln** enters eˣ. Parentheses become square grouping brackets under 2nd. The complex key shows **j** in rectangular mode and **∠** in polar mode. **2nd → backspace** clears the active expression.
 - Past expressions retain their visual fraction/exponent structure and can be recalled. Past results insert their exact stored complex value. Existing plain-text history remains readable.
 
 ## Calculator functions
@@ -70,3 +71,17 @@ History, settings and exact variable values are stored locally. Within AppLaunch
 The online preview is an ordinary static calculator. Use AppLauncher for installed/offline delivery. Changes to sharing or installation behavior should be made in that separate repository.
 
 MathLive is distributed under its included MIT license (`mathlive-LICENSE.txt` in the output). The icon source is editable SVG; after changing it, run `node scripts/render-icon.mjs` with Playwright Chromium installed, then rebuild.
+
+## Update an installed calculator
+
+Choose **menu → Settings & help → Update app** while online. It checks the shared
+AppLauncher engine, downloads the latest published calculator release from this
+repository’s GitHub Pages site with progress, verifies every file and atomically
+replaces the cached calculator. History, variables and settings remain intact;
+failed or incomplete deployments keep the previous version available offline.
+Future updates do not require the laptop or another QR. Builds publish a hashed
+`release.json` file list alongside the app; no separate server is needed.
+
+Copies installed before this update button existed need one final transfer to get
+the button. iOS may retain existing Home Screen artwork until the app is re-added;
+web content updates cannot force an OS icon refresh.

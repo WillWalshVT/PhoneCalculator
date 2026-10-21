@@ -31,18 +31,26 @@ try {
  const downloadPromise=page.waitForEvent('download');await page.getByRole('button',{name:'Export calculation history'}).click();assert.equal((await downloadPromise).suggestedFilename(),'phasor-history.json');
 
  async function key(k){await page.locator('[data-key="'+k+'"]').click();}
- async function move(direction){await page.locator('[data-command="'+direction+'"]').click();}
+ async function tab(back=false){await page.getByRole('button',{name:back?'Tab backward':'Tab forward',exact:true}).click();}
+ async function clear(){await page.locator('#second').click();await page.locator('#back').click();}
  async function fraction(){await page.locator('#second').click();await key('÷');}
- await key('AC');await fraction();await key('1');await move('moveDown');await key('2');await key('enter');assert.match(await page.locator('.past-result').last().textContent(),/^0.5 ∠/);
- await key('AC');await fraction();await fraction();await key('1');await move('moveDown');await key('2');await move('moveToNextChar');await move('moveDown');await key('3');
- assert.match(await page.locator('#expression').evaluate(e=>e.value),/\\frac/);await key('enter');assert.match(await page.locator('.past-result').last().textContent(),/^0.1666666667 ∠/);
- await key('AC');await key('2');await key('^');await key('3');await key('^');await key('2');await key('enter');assert.match(await page.locator('.past-result').last().textContent(),/^512 ∠/);
- await key('AC');await key('2');await key('^');await fraction();await key('1');await move('moveDown');await key('2');await key('enter');assert.match(await page.locator('.past-result').last().textContent(),/^1.414213562 ∠/);
- await key('AC');await fraction();await key('1');await key('enter');assert.match(await page.locator('#message').textContent(),/empty expression slots/);
- await key('AC');await key('2');await key('^');await key('3');await move('moveToNextChar');await key('+');await key('1');await key('enter');assert.match(await page.locator('.past-result').last().textContent(),/^9 ∠/);
- await key('AC');await page.locator('#form').click();await fraction();await key('1');await move('moveDown');await key('2');await key('+');await fraction();await key('3');await move('moveDown');await key('4');
+ await clear();await key('1');await key('÷');await key('2');await key('enter');assert.match(await page.locator('.past-result').last().textContent(),/^0.5 ∠/,'Ordinary keypad division');
+ await clear();await fraction();await key('1');await tab();await key('2');await key('enter');assert.match(await page.locator('.past-result').last().textContent(),/^0.5 ∠/);
+ await clear();await key('2');await key('^');await key('3');await key('^');await key('2');await key('enter');assert.match(await page.locator('.past-result').last().textContent(),/^512 ∠/);
+ await clear();await key('2');await key('^');await fraction();await key('1');await tab();await key('2');await key('enter');assert.match(await page.locator('.past-result').last().textContent(),/^1.414213562 ∠/);
+ await clear();await fraction();await key('1');await key('enter');assert.match(await page.locator('#message').textContent(),/empty expression slots/);
+ await clear();await key('2');await key('^');await key('3');await tab();await key('+');await key('1');await key('enter');assert.match(await page.locator('.past-result').last().textContent(),/^9 ∠/);
+ await clear();await page.locator('#form').click();await fraction();await key('1');await tab();await key('2');await key('+');await fraction();await key('3');await tab();await key('4');
  await page.waitForFunction(()=>document.querySelector('#expression').value.includes('4'));await page.evaluate(()=>document.fonts.ready);await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));await page.screenshot({path:'test-results/calculator-structured.png'});await key('enter');assert.equal(await page.locator('.past-result').last().textContent(),'0.3636363636');
- await key('AC');
+ await clear();await page.locator('#second').click();await key('^');await key('3');await tab();await key('8');await key('enter');assert.equal(await page.locator('.past-result').last().textContent(),'2','Indexed root slots');
+ await clear();await page.locator('#second').click();await key('ln');await key('1');await key('enter');assert.equal(await page.locator('.past-result').last().textContent(),'2.718281828');
+ await clear();await page.locator('#second').click();await key('(');await key('2');await key('+');await key('3');await page.locator('#second').click();await key(')');await key('×');await key('4');await key('enter');assert.equal(await page.locator('.past-result').last().textContent(),'20','Square bracket grouping');
+ await clear();await key('−');await key('2');await key('enter');assert.equal(await page.locator('.past-result').last().textContent(),'−2'.replace('−','-'));
+ assert.equal(await page.locator('.navigation').count(),0);assert.equal(await page.locator('#keys .key').count(),16);assert.match(await page.locator('[data-key=complex]').textContent(),/j/);await page.locator('#form').click();assert.match(await page.locator('[data-key=complex]').textContent(),/∠/);
+ const colors=await page.locator('.calculation').evaluateAll(es=>es.slice(-2).map(e=>getComputedStyle(e).backgroundColor));assert.notEqual(colors[0],colors[1]);
+ await setExpression('123+4j');await page.waitForFunction(()=>document.querySelector('#expression').shadowRoot.querySelector('.ML__cmr'));
+ const fonts=await page.locator('#expression').evaluate(e=>[...e.shadowRoot.querySelectorAll('.ML__cmr')].map(x=>getComputedStyle(x).fontFamily));assert.ok(fonts.length);assert.ok(fonts.every(x=>x.includes('KaTeX_SansSerif')));
+ await clear();
  const clean=await browser.newContext({viewport:{width:390,height:844}});const fresh=await clean.newPage();await fresh.goto(base);await fresh.locator('#expression').waitFor();assert.equal(await fresh.locator('#history').textContent(),'');assert.equal(await fresh.locator('header,footer,#catalog,#keyboard,.brand,.empty,.mode-label').count(),0);await fresh.screenshot({path:'test-results/calculator-empty.png'});await clean.close();
  for(const size of [{width:390,height:844},{width:375,height:667}]){await page.setViewportSize(size);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth||document.documentElement.scrollHeight>innerHeight),false,'Phone viewport fits');}
  assert.equal(await page.locator('link[rel=manifest]').count(),0);
