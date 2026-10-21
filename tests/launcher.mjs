@@ -2,6 +2,7 @@
 // Run after build: APP_LAUNCHER_URL=https://.../AppLauncher/ node tests/launcher.mjs
 import {chromium} from '@playwright/test';
 import {resolve} from 'node:path';
+import {toLatex} from '../src/expression.js';
 import assert from 'node:assert/strict';
 const base=process.env.APP_LAUNCHER_URL;
 if(!base)throw Error('Set APP_LAUNCHER_URL to a running AppLauncher instance.');
@@ -19,11 +20,11 @@ try{
  const manifest=await phone.evaluate(async()=>fetch(document.querySelector('link[rel=manifest]').href).then(r=>r.json()));assert.equal(manifest.name,'Phasor');assert.ok(manifest.id.endsWith('launch.html?app=phasor-calculator'));
  const start=await phone.locator('#start-link').getAttribute('href');await pwa.goto(start);
  const app=pwa.frameLocator('#app-frame');await app.locator('#expression').waitFor({timeout:90000});
- await app.locator('#expression').fill('z=3+4j');await app.locator('[data-key="enter"]').click();assert.equal(await app.locator('.past-result').last().textContent(),'3 + 4j');
+ await app.locator('#expression').evaluate((e,l)=>e.setValue(l),toLatex('z=3+4j'));await app.locator('[data-key="enter"]').click();assert.equal(await app.locator('.past-result').last().textContent(),'3 + 4j');
  assert.equal(await pwa.locator('.shell,.toast').count(),0,'All transfer controls disappear');
  await senderContext.close();await phoneContext.close();await pwaContext.setOffline(true);await pwa.reload();await app.locator('#expression').waitFor();
- await app.locator('#expression').fill('abs(z)');await app.locator('[data-key="enter"]').click();assert.equal(await app.locator('.past-result').last().textContent(),'5');
- await app.locator('#form').click();await app.locator('#expression').fill('parallel(100,100)');await app.locator('[data-key="enter"]').click();assert.equal(await app.locator('.past-result').last().textContent(),'50 ∠ 0°');
+ await app.locator('#expression').evaluate((e,l)=>e.setValue(l),toLatex('abs(z)'));await app.locator('[data-key="enter"]').click();assert.equal(await app.locator('.past-result').last().textContent(),'5');
+ await app.locator('#form').click();await app.locator('#expression').evaluate((e,l)=>e.setValue(l),toLatex('parallel(100,100)'));await app.locator('[data-key="enter"]').click();assert.equal(await app.locator('.past-result').last().textContent(),'50 ∠ 0°');
  assert.deepEqual(errors,[]);
  console.log('PASS: real signaling/WebRTC, Phasor name/icon discovery, unique install identity, fresh PWA storage transfer, hidden transfer UI, offline restart and persisted complex variables. OS installation itself is not simulated.');
 }finally{await browser.close();}

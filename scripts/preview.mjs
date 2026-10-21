@@ -5,7 +5,7 @@ import { resolve, extname } from 'node:path';
 const root=resolve('dist');
 const prefix=process.env.PREVIEW_PREFIX || '/';
 const port=Number(process.env.PORT || 8080);
-const types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.webmanifest':'application/manifest+json','.png':'image/png'};
+const types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.webmanifest':'application/manifest+json','.png':'image/png','.svg':'image/svg+xml','.woff2':'font/woff2','.json':'application/json'};
 const server=http.createServer(async(req,res)=>{
  try{
   let path=new URL(req.url,'http://localhost').pathname;

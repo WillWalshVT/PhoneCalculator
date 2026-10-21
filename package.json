@@ -1,6 +1,6 @@
 {
   "name": "phasor-calculator",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,7 +12,8 @@
     "publish:prepare": "node scripts/build.mjs && node scripts/prepare-pages.mjs"
   },
   "dependencies": {
-    "mathjs": "14.8.1"
+    "mathjs": "14.8.1",
+    "mathlive": "0.111.1"
   },
   "devDependencies": {
     "@playwright/test": "1.56.1",
