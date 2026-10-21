@@ -1,4 +1,4 @@
-name: Test Pocket Library
+name: Test Phasor Calculator
 on:
   push:
     branches: [main]
